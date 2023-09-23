@@ -20,16 +20,16 @@ public class UrlProcessor implements PageProcessor {
     static final String directory = "./extra";
     @Override
     public void process(Page page) {
-        Html html ;
-        if(Utils.pageTodayFetched(siteName, directory)){
-            html = Utils.readHtmlSavedPage(siteName, directory);
-            page.setHtml(html);
-        }
-        else {
-            html = page.getHtml();
-
-            Utils.save(siteName, directory, html.get());
-        }
+        Html html = page.getHtml();;
+//        if(Utils.pageTodayFetched(siteName, directory)){
+//            html = Utils.readHtmlSavedPage(siteName, directory);
+//            page.setHtml(html);
+//        }
+//        else {
+//            html = page.getHtml();
+//
+//            Utils.save(siteName, directory, html.get());
+//        }
 
 //        List<String> all1 = links.all();
 //        System.out.println("Link xml:  "+ html);
@@ -37,9 +37,20 @@ public class UrlProcessor implements PageProcessor {
 //        List<String> all = page.getHtml().xpath(URL_XPATH).links().all();
         List<String> all = html.regex("https:\\/\\/www.bcs.org\\/events-calendar\\/\\d{4}\\/[a-zA-Z]*\\/[a-zA-Z-]+").all();
 //        List<String> all = html.regex("https:\\/\\/www.varzesh3.com\\/news\\/\\d{7}\\/").all();
+//        page.addTargetRequests(all);
         page.addTargetRequest(all.get(0));
-        System.out.println(all.get(0));
-        page.putField("url", page.getHtml().css("pageheader-title"));
+
+//        System.out.println(all.get(0));
+        page.putField("url", page.getHtml().getDocument().head().baseUri());//css(".pageheader-title")
+        page.putField("title", page.getHtml().css("[@class=.pageheader-title]"));
+        page.putField("title2", page.getHtml().css(".pageheader-title"));
+        page.putField("content", page.getHtml().xpath("//p[3]"));
+        page.putField("speaker", page.getHtml().xpath("//p[5]"));
+        page.putField("eventInfo", page.getHtml().css(".eventinfo-detail:nth-child(1) > .eventinfo-subtitle"));
+//        page.putField("SMART-CONTENT",page.getHtml().getDocument().body());//css(".pageheader-title")
+
+        System.out.println(page.getHtml().smartContent());
+//        System.out.println(page.getHtml().getDocument().body());
         //System.out.println("Link list:  "+ all.size() + " ********" + all);
 
     }
@@ -58,7 +69,7 @@ public class UrlProcessor implements PageProcessor {
             .create(new UrlProcessor())
             .addUrl(baseUrl)
             .addPipeline(new JsonFilePipeline(directory))
-            .thread(1)
+            .thread(3)
             .run();
     }
 }
