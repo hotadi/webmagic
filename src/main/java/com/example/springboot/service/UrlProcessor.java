@@ -6,6 +6,8 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.pipeline.JsonFilePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.scheduler.BloomFilterDuplicateRemover;
+import us.codecraft.webmagic.scheduler.FileCacheQueueScheduler;
 import us.codecraft.webmagic.selector.Html;
 
 import java.io.FileNotFoundException;
@@ -43,6 +45,10 @@ public class UrlProcessor implements PageProcessor {
 //        List<String> all = html.regex("https:\\/\\/www.varzesh3.com\\/news\\/\\d{7}\\/").all();
 //        page.addTargetRequests(all);
         page.addTargetRequest(all.get(0));
+        page.addTargetRequest(all.get(1));
+        page.addTargetRequest(all.get(2));
+
+
 
 //        System.out.println(all.get(0));
 //        page.putField("url", page.getHtml().getDocument().head().baseUri());//css(".pageheader-title")
@@ -73,6 +79,7 @@ public class UrlProcessor implements PageProcessor {
             .create(new UrlProcessor())//.startUrls(new ArrayList<>(){baseUrl.})
             .addUrl(baseUrl)
             .addPipeline(new OneFilePipeline())//.addPipeline(new JsonFilePipeline(directory))
+                .setScheduler(new FileCacheQueueScheduler("./extra/webmagic/cache/").setDuplicateRemover(new BloomFilterDuplicateRemover(10000000)))
             .thread(3)
             .run();
     }
