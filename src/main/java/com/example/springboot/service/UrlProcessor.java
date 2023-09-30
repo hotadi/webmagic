@@ -1,5 +1,6 @@
 package com.example.springboot.service;
 
+import com.example.springboot.pipline.OneFilePipeline;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
@@ -7,6 +8,9 @@ import us.codecraft.webmagic.pipeline.JsonFilePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UrlProcessor implements PageProcessor {
@@ -41,9 +45,9 @@ public class UrlProcessor implements PageProcessor {
         page.addTargetRequest(all.get(0));
 
 //        System.out.println(all.get(0));
-        page.putField("url", page.getHtml().getDocument().head().baseUri());//css(".pageheader-title")
-        page.putField("title", page.getHtml().css("[@class=.pageheader-title]"));
-        page.putField("title2", page.getHtml().css(".pageheader-title"));
+//        page.putField("url", page.getHtml().getDocument().head().baseUri());//css(".pageheader-title")
+//        page.putField("title", page.getHtml().css("[@class=.pageheader-title]"));
+        page.putField("title", page.getHtml().css(".pageheader-title"));
         page.putField("content", page.getHtml().xpath("//p[3]"));
         page.putField("speaker", page.getHtml().xpath("//p[5]"));
         page.putField("eventInfo", page.getHtml().css(".eventinfo-detail:nth-child(1) > .eventinfo-subtitle"));
@@ -60,15 +64,15 @@ public class UrlProcessor implements PageProcessor {
         return site;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         siteName = args[0];
         String baseUrl = args[1];
         URL_XPATH = args[2];
 
         Spider
-            .create(new UrlProcessor())
+            .create(new UrlProcessor())//.startUrls(new ArrayList<>(){baseUrl.})
             .addUrl(baseUrl)
-            .addPipeline(new JsonFilePipeline(directory))
+            .addPipeline(new OneFilePipeline())//.addPipeline(new JsonFilePipeline(directory))
             .thread(3)
             .run();
     }
